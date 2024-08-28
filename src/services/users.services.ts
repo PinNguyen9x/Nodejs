@@ -1,9 +1,13 @@
+import { ObjectId } from 'mongodb'
 import { TokenType } from '~/constants/enums'
 import { RegisterRqBody } from '~/models/requests/User.request'
+import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import User from '~/models/schemas/User.schemas'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import databaseService from './database.services'
+import { config } from 'dotenv'
+config()
 
 class UsersService {
   private signAccessToken = (user_id: string) => {
@@ -19,6 +23,9 @@ class UsersService {
       options: { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
     })
   }
+  private createAccessTokenRefreshToken = (user_id: string) => {
+    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
+  }
   async register(payload: RegisterRqBody) {
     const result = await databaseService.users.insertOne(
       new User({
@@ -32,11 +39,21 @@ class UsersService {
       this.signAccessToken(user_id),
       this.signRefreshToken(user_id)
     ])
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: refreshToken })
+    )
     return { accessToken, refreshToken }
   }
   async checkEmailExisted(email: string) {
     const result = await databaseService.users.findOne({ email })
     return Boolean(result)
+  }
+  async login(user_id: string) {
+    const [accessToken, refreshToken] = await this.createAccessTokenRefreshToken(user_id)
+    await databaseService.refreshTokens.insertOne(
+      new RefreshToken({ user_id: new ObjectId(user_id), token: refreshToken })
+    )
+    return { accessToken, refreshToken }
   }
 }
 

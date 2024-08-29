@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import jwt, { SignOptions } from 'jsonwebtoken'
+import { TokenPayload } from '~/models/requests/User.request'
 config()
 
 export const signToken = ({
@@ -18,17 +19,17 @@ export const signToken = ({
     })
   })
 }
-export const verifyAcessToken = ({
+export const verifyToken = ({
   token,
   secretKey = process.env.JWT_SECRET_KEY
 }: {
   token: string
   secretKey?: string
 }) => {
-  return new Promise<jwt.VerifyCallback>((resolve, reject) => {
+  return new Promise<TokenPayload>((resolve, reject) => {
     jwt.verify(token, secretKey as string, (err, decoded) => {
       if (err) throw reject(err)
-      resolve(decoded as jwt.VerifyCallback)
+      resolve(decoded as TokenPayload)
     })
   })
 }

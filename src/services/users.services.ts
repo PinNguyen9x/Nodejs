@@ -10,7 +10,7 @@ import databaseService from './database.services'
 import { USER_MESSAGES } from '~/constants/messages'
 import { verify } from 'crypto'
 import Follower from '~/models/schemas/Follower.schema'
-config()
+import { envConfig } from '~/constants/config'
 
 class UsersService {
   private signAccessToken = ({
@@ -22,16 +22,16 @@ class UsersService {
   }) => {
     return signToken({
       payload: { user_id, verify, token_type: TokenType.AccessToken },
-      privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string,
-      options: { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN }
+      privateKey: envConfig.jwtSecretAccessToken,
+      options: { expiresIn: envConfig.accessTokenExpiresIn }
     })
   }
 
   private signRefreshToken = ({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) => {
     return signToken({
       payload: { user_id, verify, token_type: TokenType.RefreshToken },
-      privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
-      options: { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
+      privateKey: envConfig.jwtSecretRefreshToken,
+      options: { expiresIn: envConfig.refreshTokenExpiresIn }
     })
   }
   private createAccessTokenRefreshToken = ({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) => {
@@ -40,7 +40,7 @@ class UsersService {
   private decodeRefreshToken(refresh_token: string) {
     return verifyToken({
       token: refresh_token,
-      secretOrPublicKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+      secretOrPublicKey: envConfig.jwtSecretRefreshToken
     })
   }
   private signEmailVerifyToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
@@ -50,8 +50,8 @@ class UsersService {
         token_type: TokenType.EmailVerifyToken,
         verify
       },
-      privateKey: process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN as string,
-      options: { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
+      privateKey: envConfig.jwtSecretEmailVerifyToken,
+      options: { expiresIn: envConfig.emailVerifyTokenExpiresIn }
     })
   }
   private signForgotPasswordToken({ user_id }: { user_id: string }) {
@@ -60,8 +60,8 @@ class UsersService {
         user_id,
         token_type: TokenType.ForgotPasswordToken
       },
-      privateKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string,
-      options: { expiresIn: process.env.FORGOT_PASSWORD_EXPIRES_IN }
+      privateKey: envConfig.jwtSecretForgotPasswordToken,
+      options: { expiresIn: envConfig.forgotPasswordTokenExpiresIn }
     })
   }
   async register(payload: RegisterRqBody) {

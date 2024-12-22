@@ -1,0 +1,39 @@
+/static/image/{name}:
+  get:
+    tags:
+      - Static
+    summary: Get image by name
+    parameters:
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Image file
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+
+/static/video/{name}:
+  get:
+    tags:
+      - Static
+    summary: Get video by name
+    parameters:
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Video file
+        content:
+          video/*:
+            schema:
+              type: string
+              format: binary

@@ -1,0 +1,337 @@
+/users/login:
+  post:
+    tags:
+      - Users
+    summary: User Login
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                format: password
+    responses:
+      200:
+        description: Login successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                refresh_token:
+                  type: string
+      401:
+        description: Invalid credentials
+
+/users/register:
+  post:
+    tags:
+      - Users
+    summary: Register a new user
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+              - email
+              - password
+              - confirm_password
+              - date_of_birth
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                format: password
+              confirm_password:
+                type: string
+              date_of_birth:
+                type: string
+                format: date-time
+    responses:
+      201:
+        description: User registered successfully
+
+/users/logout:
+  post:
+    tags:
+      - Users
+    summary: User Logout
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - refresh_token
+            properties:
+              refresh_token:
+                type: string
+    responses:
+      200:
+        description: Logout successful
+
+/users/refresh-token:
+  post:
+    tags:
+      - Users
+    summary: Refresh access token
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - refresh_token
+            properties:
+              refresh_token:
+                type: string
+    responses:
+      200:
+        description: New access token generated
+
+/users/verify-email:
+  post:
+    tags:
+      - Users
+    summary: Verify email
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email_verify_token
+            properties:
+              email_verify_token:
+                type: string
+    responses:
+      200:
+        description: Email verified successfully
+
+/users/resend-verify-email:
+  post:
+    tags:
+      - Users
+    summary: Resend verification email
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Verification email sent
+
+/users/forgot-password:
+  post:
+    tags:
+      - Users
+    summary: Request password reset
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+            properties:
+              email:
+                type: string
+                format: email
+    responses:
+      200:
+        description: Password reset email sent
+
+/users/verify-forgot-password:
+  post:
+    tags:
+      - Users
+    summary: Verify forgot password token
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - forgot_password_token
+            properties:
+              forgot_password_token:
+                type: string
+    responses:
+      200:
+        description: Token verified successfully
+
+/users/reset-password:
+  post:
+    tags:
+      - Users
+    summary: Reset password
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - forgot_password_token
+              - password
+              - confirm_password
+            properties:
+              forgot_password_token:
+                type: string
+              password:
+                type: string
+                format: password
+              confirm_password:
+                type: string
+    responses:
+      200:
+        description: Password reset successful
+
+/users/me:
+  get:
+    tags:
+      - Users
+    summary: Get current user profile
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: User profile retrieved successfully
+  patch:
+    tags:
+      - Users
+    summary: Update current user profile
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              date_of_birth:
+                type: string
+                format: date-time
+              bio:
+                type: string
+              location:
+                type: string
+              website:
+                type: string
+              username:
+                type: string
+              avatar:
+                type: string
+              cover_photo:
+                type: string
+    responses:
+      200:
+        description: Profile updated successfully
+
+/users/{username}:
+  get:
+    tags:
+      - Users
+    summary: Get user profile by username
+    parameters:
+      - in: path
+        name: username
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Profile retrieved successfully
+
+/users/follow:
+  post:
+    tags:
+      - Users
+    summary: Follow a user
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - followed_user_id
+            properties:
+              followed_user_id:
+                type: string
+    responses:
+      200:
+        description: Successfully followed user
+
+/users/follow/{user_id}:
+  delete:
+    tags:
+      - Users
+    summary: Unfollow a user
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Successfully unfollowed user
+
+/users/change-password:
+  put:
+    tags:
+      - Users
+    summary: Change password
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - old_password
+              - password
+              - confirm_password
+            properties:
+              old_password:
+                type: string
+              password:
+                type: string
+              confirm_password:
+                type: string
+    responses:
+      200:
+        description: Password changed successfully

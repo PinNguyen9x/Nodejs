@@ -11,7 +11,7 @@
     "paths": {
       "~/*": ["src/*"]
     },
-    "rootDir": "src",
+    "rootDir": ".",
     "allowJs": true,
     "resolveJsonModule": true,
     "declaration": true,
@@ -21,6 +21,6 @@
     "require": ["tsconfig-paths/register"]
   },
   "files": ["src/type.d.ts"],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "openapi/**/*"],
   "exclude": ["node_modules"]
 }

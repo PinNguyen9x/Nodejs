@@ -2,6 +2,8 @@ import cors, { CorsOptions } from 'cors'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
+import { specs } from 'openapi'
+import swaggerUi from 'swagger-ui-express'
 import { envConfig, isProduction } from './constants/config'
 import { defaultErrorHandler } from './middlewares/errors.middlewares'
 import mediasRouter from './routes/medias.routes'
@@ -9,6 +11,7 @@ import staticRouter from './routes/static.routes'
 import usersRouter from './routes/users.routes'
 import databaseService from './services/database.services'
 import { initFolder } from './utils/file'
+
 const port = envConfig.port
 initFolder()
 const app = express()
@@ -29,13 +32,54 @@ app.use(limiter)
 app.use('/medias', mediasRouter)
 app.use('/users', usersRouter)
 app.use('/static', staticRouter)
-app.use(defaultErrorHandler)
-
-// Add error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Global error handler:', err)
-  res.status(500).json({ error: 'Internal Server Error', message: err.message })
+app.get('/health', async (req, res) => {
+  try {
+    await databaseService.checkHealth()
+    res.status(200).json({ status: 'ok', message: 'Server is healthy' })
+  } catch (error) {
+    console.error('Health check failed:', error)
+    res.status(500).json({ status: 'error', message: 'Database connection failed' })
+  }
 })
+app.get('/', (req, res) => {
+  res.status(200).send(`
+    <html>
+      <head>
+        <title>API Server</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+          }
+          .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          h1 { color: #2ecc71; }
+          p { color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>🎉 Congratulations!</h1>
+          <p>Your API server is running successfully.</p>
+          <p>Check out the API documentation at <a href="/api-docs">/api-docs</a></p>
+        </div>
+      </body>
+    </html>
+  `)
+})
+app.use(defaultErrorHandler)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 // Connect to database before starting server
 const startServer = async () => {
@@ -80,16 +124,5 @@ process.on('uncaughtException', (err) => {
 })
 
 startServer()
-
-// Add this near your other routes
-app.get('/health', async (req, res) => {
-  try {
-    await databaseService.checkHealth()
-    res.status(200).json({ status: 'ok', message: 'Server is healthy' })
-  } catch (error) {
-    console.error('Health check failed:', error)
-    res.status(500).json({ status: 'error', message: 'Database connection failed' })
-  }
-})
 
 export default app

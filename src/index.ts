@@ -3,7 +3,6 @@ import express from 'express'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
 import { envConfig, isProduction } from './constants/config'
-import { UPLOAD_VIDEO_DIR } from './constants/dir'
 import { defaultErrorHandler } from './middlewares/errors.middlewares'
 import mediasRouter from './routes/medias.routes'
 import staticRouter from './routes/static.routes'
@@ -11,7 +10,6 @@ import usersRouter from './routes/users.routes'
 import databaseService from './services/database.services'
 import { initFolder } from './utils/file'
 const port = envConfig.port
-databaseService.connect()
 initFolder()
 const app = express()
 const corsOptions: CorsOptions = {
@@ -31,10 +29,29 @@ app.use(limiter)
 app.use('/medias', mediasRouter)
 app.use('/users', usersRouter)
 app.use('/static', staticRouter)
-app.use('/static/videos', express.static(UPLOAD_VIDEO_DIR))
 app.use(defaultErrorHandler)
 
-// listen on port 3000
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`)
+// Connect to database before starting server
+const startServer = async () => {
+  try {
+    await databaseService.connect()
+
+    app.listen(envConfig.port, () => {
+      console.log(`Server is running on port ${envConfig.port}`)
+    })
+  } catch (err) {
+    console.error('Failed to connect to database:', err)
+    process.exit(1)
+  }
+}
+
+startServer()
+
+// Add error handlers
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err)
+})
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err)
 })

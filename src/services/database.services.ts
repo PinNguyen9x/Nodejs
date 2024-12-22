@@ -1,11 +1,14 @@
-import { config } from 'dotenv'
 import { Collection, Db, MongoClient } from 'mongodb'
 import { envConfig } from '~/constants/config'
 import Follower from '~/models/schemas/Follower.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schemas'
 import User from '~/models/schemas/User.schemas'
 import VideoStatus from '~/models/schemas/VideoSatus.schemas'
+
 const uri = `mongodb+srv://${envConfig.dbUsername}:${envConfig.dbPassword}@learnnodejs.rlzme.mongodb.net/?retryWrites=true&w=majority&appName=LearnNodejs`
+
+let client: MongoClient | null = null
+let db: Db | null = null
 
 class DatabaseService {
   private client: MongoClient
@@ -13,7 +16,11 @@ class DatabaseService {
   private static instance: DatabaseService
 
   constructor() {
-    this.client = new MongoClient(uri)
+    this.client = new MongoClient(uri, {
+      maxPoolSize: 10,
+      maxIdleTimeMS: 50000,
+      serverSelectionTimeoutMS: 5000
+    })
     this.db = this.client.db(envConfig.dbName)
   }
 
@@ -26,17 +33,17 @@ class DatabaseService {
 
   async connect() {
     try {
-      if (!this.client.connect) {
-        await this.client.connect()
-        await this.client.db('admin').command({ ping: 1 })
+      if (!client) {
+        client = await this.client.connect()
+        db = this.db
         console.log('Connected to MongoDB!')
       }
+      return db
     } catch (error) {
-      console.log(error)
+      console.error('MongoDB connection error:', error)
       throw error
     }
   }
-
   get users(): Collection<User> {
     return this.db.collection(envConfig.dbUsersCollection || '')
   }

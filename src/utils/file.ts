@@ -3,26 +3,30 @@ import { File } from 'formidable'
 import fs from 'fs'
 import path from 'path'
 import { UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_DIR, UPLOAD_VIDEO_TEMP_DIR } from '../constants/dir'
+
 export const initFolder = () => {
+  if (process.env.VERCEL) return
   ;[UPLOAD_IMAGE_TEMP_DIR, UPLOAD_VIDEO_TEMP_DIR].forEach((dir) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, {
-        recursive: true // mục đích là để tạo folder nested
+        recursive: true
       })
     }
   })
 }
+
 export const getExtension = (fullname: string) => {
   const namearr = fullname.split('.')
   return namearr[namearr.length - 1]
 }
+
 export const handleUploadImage = async (req: Request) => {
   const formidable = (await import('formidable')).default
   const form = formidable({
     uploadDir: UPLOAD_IMAGE_TEMP_DIR,
     maxFiles: 4,
     keepExtensions: true,
-    maxFileSize: 300 * 1024, // 300KB
+    maxFileSize: 300 * 1024,
     maxTotalFileSize: 300 * 1024 * 4,
     filter: function ({ name, originalFilename, mimetype }) {
       const valid = name === 'image' && Boolean(mimetype?.includes('image/'))
@@ -32,13 +36,17 @@ export const handleUploadImage = async (req: Request) => {
       return valid
     }
   })
+
+  if (process.env.VERCEL) {
+    await fs.promises.mkdir(UPLOAD_IMAGE_TEMP_DIR, { recursive: true })
+  }
+
   return new Promise<File[]>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err)
       }
-      // eslint-disable-next-line no-extra-boolean-cast
-      if (!Boolean(files.image)) {
+      if (!files.image) {
         return reject(new Error('File is empty'))
       }
       resolve(files.image as File[])
@@ -46,25 +54,18 @@ export const handleUploadImage = async (req: Request) => {
   })
 }
 
-// Cách xử lý khi upload video và encode
-// Có 2 giai đoạn
-// Upload video: Upload video thành công thì resolve về cho người dùng
-// Encode video: Khai báo thêm 1 url endpoint để check xem cái video đó đã encode xong chưa
-
 export const handleUploadVideo = async (req: Request) => {
   const formidable = (await import('formidable')).default
-  // Cách để có được định dạng idname/idname.mp4
-  // ✅Cách 1: Tạo unique id cho video ngay từ đầu
-  // ❌Cách 2: Đợi video upload xong rồi tạo folder, move video vào
-
   const nanoId = (await import('nanoid')).nanoid
   const idName = nanoId()
   const folderPath = path.resolve(UPLOAD_VIDEO_DIR, idName)
-  fs.mkdirSync(folderPath)
+
+  await fs.promises.mkdir(folderPath, { recursive: true })
+
   const form = formidable({
     uploadDir: folderPath,
     maxFiles: 1,
-    maxFileSize: 50 * 1024 * 1024, // 50MB
+    maxFileSize: 50 * 1024 * 1024,
     filter: function ({ name, originalFilename, mimetype }) {
       const valid = name === 'video' && Boolean(mimetype?.includes('mp4') || mimetype?.includes('quicktime'))
       if (!valid) {
@@ -76,22 +77,23 @@ export const handleUploadVideo = async (req: Request) => {
       return idName
     }
   })
+
   return new Promise<File[]>((resolve, reject) => {
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, async (err, fields, files) => {
       if (err) {
         return reject(err)
       }
-      // eslint-disable-next-line no-extra-boolean-cast
-      if (!Boolean(files.video)) {
+      if (!files.video) {
         return reject(new Error('File is empty'))
       }
       const videos = files.video as File[]
-      videos.forEach((video) => {
+      for (const video of videos) {
         const ext = getExtension(video.originalFilename as string)
-        fs.renameSync(video.filepath, video.filepath + '.' + ext)
+        const newPath = video.filepath + '.' + ext
+        await fs.promises.rename(video.filepath, newPath)
         video.newFilename = video.newFilename + '.' + ext
-        video.filepath = video.filepath + '.' + ext
-      })
+        video.filepath = newPath
+      }
       resolve(files.video as File[])
     })
   })
@@ -101,4 +103,16 @@ export const getNameFromFullname = (fullname: string) => {
   const namearr = fullname.split('.')
   namearr.pop()
   return namearr.join('')
+}
+
+export const cleanupTempFiles = async (files: File[]) => {
+  if (process.env.VERCEL) {
+    for (const file of files) {
+      try {
+        await fs.promises.unlink(file.filepath)
+      } catch (err) {
+        console.error('Error cleaning up temp file:', err)
+      }
+    }
+  }
 }

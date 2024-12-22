@@ -22,7 +22,7 @@ class UsersService {
   }) => {
     return signToken({
       payload: { user_id, verify, token_type: TokenType.AccessToken },
-      privateKey: envConfig.jwtSecretAccessToken,
+      privateKey: envConfig.jwtSecretAccessToken || '',
       options: { expiresIn: envConfig.accessTokenExpiresIn }
     })
   }
@@ -30,7 +30,7 @@ class UsersService {
   private signRefreshToken = ({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) => {
     return signToken({
       payload: { user_id, verify, token_type: TokenType.RefreshToken },
-      privateKey: envConfig.jwtSecretRefreshToken,
+      privateKey: envConfig.jwtSecretRefreshToken || '',
       options: { expiresIn: envConfig.refreshTokenExpiresIn }
     })
   }
@@ -40,7 +40,7 @@ class UsersService {
   private decodeRefreshToken(refresh_token: string) {
     return verifyToken({
       token: refresh_token,
-      secretOrPublicKey: envConfig.jwtSecretRefreshToken
+      secretOrPublicKey: envConfig.jwtSecretRefreshToken || ''
     })
   }
   private signEmailVerifyToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
@@ -50,7 +50,7 @@ class UsersService {
         token_type: TokenType.EmailVerifyToken,
         verify
       },
-      privateKey: envConfig.jwtSecretEmailVerifyToken,
+      privateKey: envConfig.jwtSecretEmailVerifyToken || '',
       options: { expiresIn: envConfig.emailVerifyTokenExpiresIn }
     })
   }
@@ -60,7 +60,7 @@ class UsersService {
         user_id,
         token_type: TokenType.ForgotPasswordToken
       },
-      privateKey: envConfig.jwtSecretForgotPasswordToken,
+      privateKey: envConfig.jwtSecretForgotPasswordToken || '',
       options: { expiresIn: envConfig.forgotPasswordTokenExpiresIn }
     })
   }

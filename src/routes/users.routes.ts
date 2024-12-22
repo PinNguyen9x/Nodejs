@@ -15,8 +15,8 @@ import {
   updateMeController,
   verifyEmailController,
   verifyForgotPasswordController
-} from '~/controllers/users.controllers'
-import { filterMiddleware } from '~/middlewares/common.middlewares'
+} from '../controllers/users.controllers'
+import { filterMiddleware } from '../middlewares/common.middlewares'
 import {
   accessTokenValidator,
   changePasswordValidator,
@@ -31,9 +31,9 @@ import {
   updateMeValidator,
   verifiedUserValidator,
   verifyForgotPasswordTokenValidator
-} from '~/middlewares/users.middlewares'
-import { UpdateMeReqBody } from '~/models/requests/User.request'
-import { wrapRequestHandler } from '~/utils/handlers'
+} from '../middlewares/users.middlewares'
+import { UpdateMeReqBody } from '../models/requests/User.request'
+import { wrapRequestHandler } from '../utils/handlers'
 const usersRouter = Router()
 
 /**

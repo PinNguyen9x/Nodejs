@@ -1,5 +1,5 @@
 import { createHash } from 'crypto'
-import { envConfig } from '~/constants/config'
+import { envConfig } from '../constants/config'
 export const sha256 = (content: string): string => {
   return createHash('sha256').update(content).digest('hex')
 }

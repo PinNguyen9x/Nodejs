@@ -1,9 +1,9 @@
 import { Collection, Db, MongoClient } from 'mongodb'
-import { envConfig } from '~/constants/config'
-import Follower from '~/models/schemas/Follower.schema'
-import RefreshToken from '~/models/schemas/RefreshToken.schemas'
-import User from '~/models/schemas/User.schemas'
-import VideoStatus from '~/models/schemas/VideoSatus.schemas'
+import { envConfig } from '../constants/config'
+import Follower from '../models/schemas/Follower.schema'
+import RefreshToken from '../models/schemas/RefreshToken.schemas'
+import User from '../models/schemas/User.schemas'
+import VideoStatus from '../models/schemas/VideoSatus.schemas'
 
 const uri = `mongodb+srv://${envConfig.dbUsername}:${envConfig.dbPassword}@learnnodejs.rlzme.mongodb.net/?retryWrites=true&w=majority&appName=LearnNodejs`
 

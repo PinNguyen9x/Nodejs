@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb'
-import { UserVerifyStatus } from '~/constants/enums'
-import { HTTP_STATUS } from '~/constants/httpStatus'
-import { USER_MESSAGES } from '~/constants/messages'
+import { UserVerifyStatus } from '../constants/enums'
+import { HTTP_STATUS } from '../constants/httpStatus'
+import { USER_MESSAGES } from '../constants/messages'
 import {
   ChangePasswordReqBody,
   FollowReqBody,
@@ -17,10 +17,10 @@ import {
   UpdateMeReqBody,
   VerifyEmailReqBody,
   VerifyForgotPasswordReqBody
-} from '~/models/requests/User.request'
-import User from '~/models/schemas/User.schemas'
-import databaseService from '~/services/database.services'
-import { default as usersService, default as usersServices } from '~/services/users.services'
+} from '../models/requests/User.request'
+import User from '../models/schemas/User.schemas'
+import databaseService from '../services/database.services'
+import { default as usersService, default as usersServices } from '../services/users.services'
 export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User
   const user_id = user._id as ObjectId

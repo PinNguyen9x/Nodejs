@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import path from 'path'
-import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from '~/constants/dir'
-import { HTTP_STATUS } from '~/constants/httpStatus'
-import mediasService from '~/services/medias.services'
+import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from '../constants/dir'
+import { HTTP_STATUS } from '../constants/httpStatus'
+import mediasService from '../services/medias.services'
 import fs from 'fs'
 import mime from 'mime'
 

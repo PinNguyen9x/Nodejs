@@ -106,7 +106,7 @@ const forgotPasswordTokenSchema: ParamSchema = {
       try {
         const decoded_forgot_password_token = await verifyToken({
           token: value,
-          secretOrPublicKey: envConfig.jwtSecretForgotPasswordToken
+          secretOrPublicKey: envConfig.jwtSecretForgotPasswordToken || ''
         })
         const { user_id } = decoded_forgot_password_token
         const user = await databaseService.users.findOne({ _id: new ObjectId(user_id) })
@@ -179,7 +179,7 @@ export const accessTokenValidator = validate(
             try {
               const decoded_authorization = await verifyToken({
                 token: access_token,
-                secretOrPublicKey: envConfig.jwtSecretAccessToken
+                secretOrPublicKey: envConfig.jwtSecretAccessToken || ''
               })
               ;(req as Request).decoded_authorization = decoded_authorization
               return true
@@ -208,7 +208,7 @@ export const refreshTokenValidator = validate(
           options: async (value: string, { req }) => {
             try {
               const [decoded_refresh_token, refresh_token] = await Promise.all([
-                verifyToken({ token: value, secretOrPublicKey: envConfig.jwtSecretRefreshToken }),
+                verifyToken({ token: value, secretOrPublicKey: envConfig.jwtSecretRefreshToken || '' }),
                 databaseService.refreshTokens.findOne({ token: value })
               ])
               if (!refresh_token) {
@@ -315,7 +315,7 @@ export const emailVerifyTokenValidator = validate(
             try {
               const decoded_email_verify_token = await verifyToken({
                 token: value,
-                secretOrPublicKey: envConfig.jwtSecretEmailVerifyToken
+                secretOrPublicKey: envConfig.jwtSecretEmailVerifyToken || ''
               })
 
               ;(req as Request).decoded_email_verify_token = decoded_email_verify_token

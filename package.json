@@ -7,7 +7,7 @@
     "dev": "nodemon",
     "build": "tsc",
     "vercel-build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -51,5 +51,8 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "zx": "^8.2.4"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }

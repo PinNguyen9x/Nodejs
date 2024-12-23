@@ -15,9 +15,16 @@ class DatabaseService {
   constructor() {
     console.log('Initializing DatabaseService...')
     this.client = new MongoClient(uri, {
-      maxPoolSize: 1,
-      serverSelectionTimeoutMS: 30000,
-      socketTimeoutMS: 30000
+      connectTimeoutMS: 30000, // Connection timeout
+      socketTimeoutMS: 45000, // Socket timeout
+      serverSelectionTimeoutMS: 60000, // Server selection timeout
+      maxPoolSize: 10, // Maximum number of connections in the pool
+      minPoolSize: 5, // Minimum number of connections in the pool
+      retryWrites: true,
+      w: 'majority', // Write concern
+      retryReads: true,
+      maxIdleTimeMS: 120000, // Maximum idle time for connection
+      heartbeatFrequencyMS: 10000 // How often to check server status
     })
     this.db = this.client.db(envConfig.dbName)
   }
@@ -31,20 +38,32 @@ class DatabaseService {
 
   async connect() {
     try {
-      console.log('Attempting to connect to MongoDB...')
-      console.log('Database Name:', envConfig.dbName)
-
+      console.log('Connecting to MongoDB...')
       await this.client.connect()
-
-      // Test the connection
-      await this.db.command({ ping: 1 })
-      console.log('Successfully connected to MongoDB!')
+      this.db = this.client.db(envConfig.dbName)
+      console.log('Connected to MongoDB successfully')
 
       return this.db
     } catch (error) {
       console.error('MongoDB Connection Error:', error)
-      console.error('Connection URI (redacted):', uri.replace(/:([^@]+)@/, ':****@'))
-      throw error
+      // Add retry logic
+      const maxRetries = 3
+      let retries = 0
+      while (retries < maxRetries) {
+        try {
+          console.log(`Retrying connection... Attempt ${retries + 1}/${maxRetries}`)
+          await new Promise((resolve) => setTimeout(resolve, 5000)) // Wait 5 seconds before retrying
+          await this.client.connect()
+          this.db = this.client.db(envConfig.dbName)
+          console.log('Connected to MongoDB successfully after retry')
+          return
+        } catch (retryErr) {
+          retries++
+          if (retries === maxRetries) {
+            throw new Error(`Failed to connect after ${maxRetries} attempts: ${retryErr}`)
+          }
+        }
+      }
     }
   }
 
@@ -75,7 +94,13 @@ class DatabaseService {
   }
 
   public async checkHealth() {
-    return await this.db.command({ ping: 1 })
+    try {
+      await this.db.command({ ping: 1 })
+      return true
+    } catch (err) {
+      console.error('Database health check failed:', err)
+      throw err
+    }
   }
 }
 

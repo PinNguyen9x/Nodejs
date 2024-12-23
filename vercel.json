@@ -6,25 +6,19 @@
       "use": "@vercel/node"
     }
   ],
-  "rewrites": [
-    { "source": "/api-docs/(.*)", "destination": "/src/index.ts" },
-    { "source": "/swagger-ui.css", "destination": "/src/index.ts" },
-    { "source": "/swagger-ui-bundle.js", "destination": "/src/index.ts" },
-    { "source": "/swagger-ui-standalone-preset.js", "destination": "/src/index.ts" },
-    { "source": "/(.*)", "destination": "/src/index.ts" }
-  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/src/index.ts" }],
   "headers": [
     {
       "source": "/api-docs/(.*)",
       "headers": [
         {
           "key": "Content-Type",
-          "value": "application/javascript"
+          "value": "application/json"
         }
       ]
     },
     {
-      "source": "/(.*).js",
+      "source": "/swagger-ui-bundle.js",
       "headers": [
         {
           "key": "Content-Type",
@@ -33,7 +27,16 @@
       ]
     },
     {
-      "source": "/(.*).css",
+      "source": "/swagger-ui-standalone-preset.js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
+    },
+    {
+      "source": "/swagger-ui.css",
       "headers": [
         {
           "key": "Content-Type",

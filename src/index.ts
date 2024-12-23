@@ -79,7 +79,32 @@ app.get('/', (req, res) => {
   `)
 })
 app.use(defaultErrorHandler)
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
+
+// Add these options for swagger-ui-express
+const swaggerUiOptions = {
+  customCssUrl: '/swagger-ui.css',
+  customJs: ['/swagger-ui-bundle.js', '/swagger-ui-standalone-preset.js']
+}
+
+// Update your swagger setup
+app.use('/api-docs', swaggerUi.serve)
+app.get('/api-docs', swaggerUi.setup(specs, swaggerUiOptions))
+
+// Add explicit routes for swagger assets
+app.get('/swagger-ui.css', (req, res) => {
+  res.setHeader('Content-Type', 'text/css')
+  res.sendFile(require.resolve('swagger-ui-dist/swagger-ui.css'))
+})
+
+app.get('/swagger-ui-bundle.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript')
+  res.sendFile(require.resolve('swagger-ui-dist/swagger-ui-bundle.js'))
+})
+
+app.get('/swagger-ui-standalone-preset.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript')
+  res.sendFile(require.resolve('swagger-ui-dist/swagger-ui-standalone-preset.js'))
+})
 
 // Connect to database before starting server
 const startServer = async () => {

@@ -1,5 +1,6 @@
 import swaggerJsdoc from 'swagger-jsdoc'
 import { envConfig } from '../constants/config'
+import path from 'path'
 
 const options = {
   definition: {
@@ -19,7 +20,7 @@ const options = {
       }
     ]
   },
-  apis: ['./src/openapi/**/*.yaml']
+  apis: [path.join(__dirname, './paths/*.yaml'), path.join(__dirname, './components.yaml')]
 }
 
 export const specs = swaggerJsdoc(options)

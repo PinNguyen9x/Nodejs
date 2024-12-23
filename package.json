@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
-    "build": "tsc",
-    "vercel-build": "tsc",
+    "build": "tsc && cp -r src/openapi/paths dist/openapi/paths && cp src/openapi/components.yaml dist/openapi/",
+    "vercel-build": "tsc && cp -r src/openapi/paths dist/openapi/paths && cp src/openapi/components.yaml dist/openapi/",
     "start": "node dist/src/index.js"
   },
   "keywords": [],

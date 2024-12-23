@@ -1,13 +1,13 @@
 import swaggerJsdoc from 'swagger-jsdoc'
-import { envConfig } from '../src/constants/config'
+import { envConfig } from '../constants/config'
 
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Twitter API',
+      title: 'Social Media API',
       version: '1.0.0',
-      description: 'API documentation for Twitter Project'
+      description: 'API documentation for Social Media project'
     },
     servers: [
       {
@@ -16,7 +16,7 @@ const options = {
       }
     ]
   },
-  apis: ['./openapi/**/*.yaml'] // Updated path to YAML files
+  apis: ['./src/openapi/**/*.yaml'] // Updated path to YAML files
 }
 
 export const specs = swaggerJsdoc(options)

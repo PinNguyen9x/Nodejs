@@ -11,11 +11,11 @@
     "paths": {
       "~/*": ["src/*"]
     },
-    "rootDir": ".",
     "allowJs": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "rootDir": "."
   },
   "ts-node": {
     "require": ["tsconfig-paths/register"]

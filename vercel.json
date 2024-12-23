@@ -2,18 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/index.ts",
+      "src": "package.json",
       "use": "@vercel/node",
       "config": {
-        "maxDuration": 10,
-        "memory": 1024
+        "includeFiles": ["openapi/**"]
       }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
     }
   ]
 }
